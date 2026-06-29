@@ -1,98 +1,91 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useCallback, useEffect } from "react";
+import { Text, View } from "react-native";
+import { useRouter } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { useFonts } from "expo-font";
+import Animated, {
+  Easing,
+  FadeIn,
+  FadeInUp,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withTiming,
+} from "react-native-reanimated";
+import { GarageGrid } from "@/components/garage-grid";
+import { LiveDot } from "@/components/live-dot";
+import { BRANCH } from "@/data/mock";
+import { fontAssets } from "@/theme";
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+export default function Splash() {
+  const router = useRouter();
+  const [fontsLoaded] = useFonts(fontAssets);
+  const sweep = useSharedValue(0);
+
+  useEffect(() => {
+    if (!fontsLoaded) return;
+    sweep.value = withDelay(280, withTiming(1, { duration: 1300, easing: Easing.inOut(Easing.cubic) }));
+    const id = setTimeout(() => router.replace("/pages/auth/landing"), 2050);
+    return () => clearTimeout(id);
+  }, [fontsLoaded, router, sweep]);
+
+  const onLayout = useCallback(async () => {
+    if (fontsLoaded) await SplashScreen.hideAsync().catch(() => {});
+  }, [fontsLoaded]);
+
+  const ignition = useAnimatedStyle(() => ({ width: `${sweep.value * 100}%` }));
+
+  // The launch gate is intentionally always asphalt — ignition, not theme.
+  if (!fontsLoaded) return <View className="flex-1 bg-[#0B0C0F]" onLayout={onLayout} />;
+
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
+    <View className="flex-1 justify-center bg-[#0B0C0F]" onLayout={onLayout}>
+      <GarageGrid />
+
+      <View className="px-9">
+        <Animated.View entering={FadeIn.duration(500)}>
+          <Text className="font-mono-semibold text-[11px] tracking-[3px] text-[#9395A0]">
+            GARAGE CONSOLE · FIELD COMPANION
+          </Text>
+        </Animated.View>
+
+        <Animated.View entering={FadeInUp.duration(650).springify().damping(18)} className="mt-3.5">
+          <Text
+            className="font-display text-[96px] text-[#F0EFEA]"
+            style={{ lineHeight: 92, includeFontPadding: false }}
+          >
+            EX
+          </Text>
+          <Text
+            className="font-display text-[96px] text-[#FF3F4C]"
+            style={{ lineHeight: 96, includeFontPadding: false }}
+          >
+            AUTO
+          </Text>
+        </Animated.View>
+
+        {/* Ignition sweep — the one motion that earns the screen. */}
+        <View className="mt-6 h-[3px] overflow-hidden rounded-[2px] bg-white/10">
+          <Animated.View style={ignition} className="h-[3px] rounded-[2px] bg-[#FF3F4C]" />
+        </View>
+
+        <Animated.Text
+          entering={FadeIn.delay(400).duration(600)}
+          className="mt-3.5 font-sans text-[13.5px] leading-[20px] text-[#9395A0]"
+        >
+          The shop-floor half of ExAuto — inspections, job cards, and parts, on the vehicle.
+        </Animated.Text>
+      </View>
+
+      <Animated.View
+        entering={FadeIn.delay(700).duration(600)}
+        className="absolute left-9 right-9 bottom-[54px] flex-row items-center gap-2"
+      >
+        <LiveDot size={7} color="#46C266" />
+        <Text className="font-mono text-[11.5px] tracking-[0.4px] text-[#9395A0]">v1.0 · {BRANCH.toUpperCase()}</Text>
+      </Animated.View>
+    </View>
   );
 }
-
-export default function HomeScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
-
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
-  },
-});
