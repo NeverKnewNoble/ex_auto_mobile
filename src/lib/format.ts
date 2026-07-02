@@ -29,6 +29,30 @@ export function num(n: number): string {
   return n.toLocaleString("en-US");
 }
 
+/** Cedi money readout, 2 decimals. */
+export function money(n: number): string {
+  return `GH₵ ${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+/** "2026-06-28" or ISO → "28 Jun". */
+export function dateShort(iso?: string): string {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  return `${d.getDate()} ${months[d.getMonth()]}`;
+}
+
+/** ISO datetime → "28 Jun, 14:05". */
+export function dateTimeShort(iso?: string): string {
+  if (!iso) return "—";
+  return `${dateShort(iso)}, ${timeOf(iso)}`;
+}
+
+/** Current local time as ISO (for new time logs). */
+export function nowIso(): string {
+  return new Date().toISOString();
+}
+
 function pad(n: number): string {
   return n < 10 ? `0${n}` : `${n}`;
 }

@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "ex_auto",
+    "name": "EX Auto",
     "slug": "ex_auto",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,13 +8,13 @@
     "scheme": "exauto",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "bundleIdentifier": "com.exauto.app"
     },
     "android": {
+      "package": "com.exauto.app",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#0B0C0F",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false
@@ -28,17 +28,28 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
-          "android": {
+          "backgroundColor": "#0B0C0F",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 180,
+          "resizeMode": "contain",
+          "dark": {
+            "backgroundColor": "#0B0C0F",
             "image": "./assets/images/splash-icon.png",
-            "imageWidth": 76
+            "imageWidth": 180
           }
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "ff77f70f-ed77-45a5-a107-2ad91ee7aebb"
+      }
     }
   }
 }

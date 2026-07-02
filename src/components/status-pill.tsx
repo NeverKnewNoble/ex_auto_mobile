@@ -15,9 +15,10 @@ interface StatusPillProps {
 
 /** Tinted 10% fill, 40% border, solid text — the portal's signal pill. */
 export function StatusPill({ status, live, small, className }: StatusPillProps) {
-  const tone = statusToneClass(status);
+  const label = status == null ? "" : String(status);
+  const tone = statusToneClass(label);
   const { palette } = useTheme();
-  const dotColor = palette.signal[statusTone(status)];
+  const dotColor = palette.signal[statusTone(label)];
 
   return (
     <View
@@ -25,9 +26,9 @@ export function StatusPill({ status, live, small, className }: StatusPillProps) 
         small ? "px-2 py-[3px]" : "px-2.5 py-[5px]"
       } ${className ?? ""}`}
     >
-      {live && <LiveDot size={7} color={dotColor} />}
+      {live ? <LiveDot size={7} color={dotColor} /> : null}
       <Text className={`font-mono-semibold tracking-[0.3px] ${tone.text} ${small ? "text-[10px]" : "text-[11px]"}`}>
-        {status}
+        {label}
       </Text>
     </View>
   );

@@ -16,18 +16,26 @@ import {
   Small,
   type IconName,
 } from "@/components";
-import { BRANCH, CURRENT_TECH } from "@/data/mock";
+import { useSession } from "@/hooks/use-session";
 import { useTheme, type ThemeMode } from "@/theme";
+import type { RowProps } from "@/types/more";
 
 export default function More() {
   const router = useRouter();
   const { palette, setMode } = useTheme();
+  const { user, signOut } = useSession();
   const [sel, setSel] = useState<ThemeMode>("system");
 
-  const initials = CURRENT_TECH.replace(/[^A-Za-z ]/g, "")
-    .split(" ")
-    .map((w) => w[0])
-    .join("");
+  const name = user?.full_name ?? user?.name ?? "Signed-in user";
+  const role = user?.roles?.[0] ?? "Technician";
+  const branch = user?.branch;
+  const initials =
+    name
+      .replace(/[^A-Za-z ]/g, "")
+      .split(" ")
+      .map((w) => w[0])
+      .join("")
+      .slice(0, 2) || "EX";
 
   return (
     <ScreenFrame header={<AppHeader eyebrow="Account & settings" title="More" />}>
@@ -38,8 +46,8 @@ export default function More() {
             <Bold className="text-[18px] text-primary">{initials}</Bold>
           </View>
           <View className="flex-1">
-            <Bold className="text-[17px]">{CURRENT_TECH}</Bold>
-            <Small>Technician · {BRANCH}</Small>
+            <Bold className="text-[17px]">{name}</Bold>
+            <Small>{branch ? `${role} · ${branch}` : role}</Small>
           </View>
           <Icon name="qr-code-outline" size={22} color={palette.mutedForeground} />
         </View>
@@ -108,14 +116,17 @@ export default function More() {
           variant="ghost"
           icon="log-out-outline"
           block
-          onPress={() => router.replace("/pages/auth/landing")}
+          onPress={async () => {
+            await signOut();
+            router.replace("/pages/auth/landing");
+          }}
         />
       </View>
     </ScreenFrame>
   );
 }
 
-function Row({ icon, label, hint, onPress }: { icon: IconName; label: string; hint?: string; onPress?: () => void }) {
+function Row({ icon, label, hint, onPress }: RowProps) {
   const { palette } = useTheme();
   return (
     <Pressable onPress={onPress} className="flex-row items-center gap-3 px-4 py-[15px] active:opacity-70">

@@ -31,11 +31,11 @@ export default function PagesLayout() {
       }}
     >
       <Tabs.Screen
-        name="today"
+        name="dashboard"
         options={{
-          title: "TODAY",
+          title: "HOME",
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? "today" : "today-outline"} size={23} color={color} />
+            <Ionicons name={focused ? "speedometer" : "speedometer-outline"} size={23} color={color} />
           ),
         }}
       />
@@ -80,8 +80,13 @@ export default function PagesLayout() {
       <Tabs.Screen name="auth" options={{ href: null, tabBarStyle: { display: "none" } }} />
 
       {/* Stack-style routes — reachable by navigation, hidden from the tab bar. */}
+      <Tabs.Screen name="today" options={{ href: null }} />
       <Tabs.Screen name="appointment-detail" options={{ href: null }} />
+      <Tabs.Screen name="inspection-create" options={{ href: null }} />
       <Tabs.Screen name="job-detail" options={{ href: null }} />
+      <Tabs.Screen name="job-create" options={{ href: null }} />
+      <Tabs.Screen name="requisition-detail" options={{ href: null }} />
+      <Tabs.Screen name="requisition-create" options={{ href: null }} />
       <Tabs.Screen name="inspection-detail" options={{ href: null }} />
       <Tabs.Screen name="lookup" options={{ href: null }} />
     </Tabs>

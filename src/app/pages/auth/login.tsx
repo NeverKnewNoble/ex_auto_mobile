@@ -4,20 +4,37 @@ import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { AppHeader, Bold, Button, Caption, Display, Eyebrow, GarageGrid, Icon, Small } from "@/components";
-import { BRANCH } from "@/data/mock";
+import { useAction } from "@/hooks/use-action";
+import { useSession } from "@/hooks/use-session";
+import { setApiBase } from "@/services";
 import { useTheme } from "@/theme";
-import type { IconName } from "@/components";
+import type { FieldProps } from "@/types/login";
 
 export default function Login() {
   const router = useRouter();
   const { palette, isDark } = useTheme();
   const insets = useSafeAreaInsets();
+  const { signIn } = useSession();
+  const { run, busy } = useAction();
 
-  const [employeeId, setEmployeeId] = useState("");
-  const [pin, setPin] = useState("");
-  const [showPin, setShowPin] = useState(false);
+  const [site, setSite] = useState("");
+  const [usr, setUsr] = useState("");
+  const [pwd, setPwd] = useState("");
+  const [showPwd, setShowPwd] = useState(false);
 
-  const canSubmit = employeeId.trim().length > 0 && pin.length >= 4;
+  const canSubmit = site.trim().length > 0 && usr.trim().length > 0 && pwd.length > 0;
+
+  const submit = () =>
+    run(
+      async () => {
+        await setApiBase(site);
+        return signIn({ usr, pwd });
+      },
+      {
+        success: "Signed in",
+        onDone: () => router.replace("/pages/dashboard"),
+      }
+    );
 
   return (
     <View className="flex-1 bg-background">
@@ -33,54 +50,52 @@ export default function Login() {
           <Display size={30} className="mt-1">
             Sign in to your bay
           </Display>
-          <Small className="mt-2">Use your workshop employee ID and 4-digit PIN.</Small>
+          <Small className="mt-2">Use your workshop email or username and password.</Small>
 
           <View className="mt-7 gap-4">
             <Field
-              label="Employee ID"
-              icon="id-card-outline"
-              value={employeeId}
-              onChangeText={setEmployeeId}
-              placeholder="e.g. TECH-014"
-              autoCapitalize="characters"
-              mono
+              label="Site URL"
+              icon="globe-outline"
+              value={site}
+              onChangeText={setSite}
+              placeholder="example.erpxpand.com"
+              autoCapitalize="none"
+              autoCorrect={false}
+              keyboardType="url"
             />
             <Field
-              label="PIN"
+              label="Email or username"
+              icon="person-outline"
+              value={usr}
+              onChangeText={setUsr}
+              placeholder="you@workshop.com"
+              autoCapitalize="none"
+              keyboardType="email-address"
+            />
+            <Field
+              label="Password"
               icon="lock-closed-outline"
-              value={pin}
-              onChangeText={setPin}
-              placeholder="••••"
-              secure={!showPin}
-              keyboardType="number-pad"
-              maxLength={6}
-              mono
+              value={pwd}
+              onChangeText={setPwd}
+              placeholder="••••••••"
+              secure={!showPwd}
+              autoCapitalize="none"
               trailing={
-                <Pressable onPress={() => setShowPin((s) => !s)} hitSlop={10}>
-                  <Icon name={showPin ? "eye-off-outline" : "eye-outline"} size={20} color={palette.mutedForeground} />
+                <Pressable onPress={() => setShowPwd((s) => !s)} hitSlop={10}>
+                  <Icon name={showPwd ? "eye-off-outline" : "eye-outline"} size={20} color={palette.mutedForeground} />
                 </Pressable>
               }
             />
 
             <Pressable onPress={() => {}} className="self-end" hitSlop={8}>
-              <Caption className="text-accent">Forgot PIN?</Caption>
+              <Caption className="text-accent">Forgot password?</Caption>
             </Pressable>
           </View>
 
           <View className="flex-1" />
 
           <View className="gap-3" style={{ paddingBottom: insets.top + 12 }}>
-            <Button
-              label="Sign in"
-              icon="arrow-forward"
-              block
-              disabled={!canSubmit}
-              onPress={() => router.replace("/pages/today")}
-            />
-            <View className="flex-row items-center justify-center gap-1.5">
-              <Icon name="business-outline" size={13} color={palette.mutedForeground} />
-              <Caption>{BRANCH}</Caption>
-            </View>
+            <Button label="Sign in" icon="arrow-forward" block loading={busy} disabled={!canSubmit} onPress={submit} />
           </View>
         </View>
       </KeyboardAvoidingView>
@@ -95,13 +110,7 @@ function Field({
   mono,
   secure,
   ...input
-}: {
-  label: string;
-  icon: IconName;
-  trailing?: React.ReactNode;
-  mono?: boolean;
-  secure?: boolean;
-} & React.ComponentProps<typeof TextInput>) {
+}: FieldProps) {
   const { palette } = useTheme();
   return (
     <View className="gap-[7px]">

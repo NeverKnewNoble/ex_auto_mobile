@@ -4,7 +4,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import Animated, { FadeIn, FadeInUp } from "react-native-reanimated";
 import { Bold, Button, Caption, Display, Eyebrow, GarageGrid, Icon, Small } from "@/components";
-import { BRANCH } from "@/data/mock";
 import { useTheme } from "@/theme";
 import type { IconName } from "@/components";
 
@@ -28,11 +27,11 @@ export default function Landing() {
         className="flex-1 px-6"
         style={{ paddingTop: insets.top + 40, paddingBottom: insets.top }}
       >
-        <Animated.View entering={FadeIn.duration(500)}>
+        <Animated.View>
           <Eyebrow>Garage Console · Field Companion</Eyebrow>
         </Animated.View>
 
-        <Animated.View entering={FadeInUp.duration(650).springify().damping(18)} className="mt-3 flex-row items-end">
+        <Animated.View className="mt-3 flex-row items-end">
           <Display size={72}>EX</Display>
           <Display size={72} className="text-primary">
             AUTO
@@ -49,7 +48,6 @@ export default function Landing() {
           {FEATURES.map((f, i) => (
             <Animated.View
               key={f.title}
-              entering={FadeInUp.delay(200 + i * 90).duration(500)}
               className="flex-row items-center gap-3.5"
             >
               <View className="h-[46px] w-[46px] items-center justify-center rounded-md border border-primary/25 bg-primary/10">
@@ -66,13 +64,8 @@ export default function Landing() {
         <View className="flex-1" />
 
         {/* Auth options */}
-        <Animated.View entering={FadeIn.delay(450).duration(500)} className="gap-3">
+        <Animated.View className="gap-3">
           <Button label="Log in" icon="log-in-outline" block onPress={() => router.push("/pages/auth/login")} />
-          <Button label="Browse as guest" variant="ghost" block onPress={() => router.replace("/pages/today")} />
-          <View className="mt-1 flex-row items-center justify-center gap-1.5">
-            <Icon name="business-outline" size={13} color={palette.mutedForeground} />
-            <Caption>{BRANCH}</Caption>
-          </View>
         </Animated.View>
       </View>
     </View>
