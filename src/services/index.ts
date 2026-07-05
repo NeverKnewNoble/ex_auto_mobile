@@ -1,4 +1,5 @@
-export { call, serialize, FrappeError } from "./client";
+export { call, serialize, FrappeError, isOfflineError } from "./client";
+export { cachedCall, cacheStats, clearCache, availableDiskSpace, TTL, type CacheStats } from "./cache";
 export { getApiBase, setApiBase, loadApiBase } from "./config";
 export { ENDPOINTS, apiUrl } from "./endpoints";
 export { AuthService, login, logout, fetchCurrentUser } from "./auth";
@@ -10,3 +11,4 @@ export * from "./inspections";
 export * from "./appointments";
 export * from "./dashboard";
 export * from "./pickers";
+export * from "./notifications";

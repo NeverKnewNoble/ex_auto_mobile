@@ -8,8 +8,37 @@ import * as SecureStore from "expo-secure-store";
 import type { Session } from "@/types/auth";
 
 const KEY = "exauto.session";
+const OFFLINE_KEY = "exauto.offline";
 
 let current: Session | null = null;
+
+/**
+ * Offline-login record: a fingerprint of the last credentials that logged in
+ * successfully, plus the session they produced. Lets `login()` re-grant access
+ * without a connection when the same credentials are entered again. Survives the
+ * TTL cache but is cleared on an explicit sign-out.
+ */
+interface OfflineRecord {
+  fp: string;
+  session: Session;
+}
+
+export async function saveOfflineCredential(fp: string, session: Session): Promise<void> {
+  await SecureStore.setItemAsync(OFFLINE_KEY, JSON.stringify({ fp, session } satisfies OfflineRecord));
+}
+
+export async function loadOfflineCredential(): Promise<OfflineRecord | null> {
+  try {
+    const raw = await SecureStore.getItemAsync(OFFLINE_KEY);
+    return raw ? (JSON.parse(raw) as OfflineRecord) : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function clearOfflineCredential(): Promise<void> {
+  await SecureStore.deleteItemAsync(OFFLINE_KEY);
+}
 
 /** Hydrate the in-memory session from secure storage. Call once on app boot. */
 export async function loadSession(): Promise<Session | null> {

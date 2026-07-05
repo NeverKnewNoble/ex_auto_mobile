@@ -1,4 +1,4 @@
-import { call } from "./client";
+import { cachedCall, TTL } from "./cache";
 import { ENDPOINTS } from "./endpoints";
 import type {
   AttentionItem,
@@ -15,25 +15,25 @@ const E = ENDPOINTS.dashboard;
 /** Dashboard endpoints (Part 5 §4) — silent reads, optional branch. */
 export class DashboardService {
   static snapshot(branch?: string) {
-    return call<DashboardSnapshot>(E.snapshot, { branch });
+    return cachedCall<DashboardSnapshot>(E.snapshot, { branch }, TTL.summary);
   }
   static kpisPrimary(branch?: string) {
-    return call<PrimaryKpis>(E.kpisPrimary, { branch });
+    return cachedCall<PrimaryKpis>(E.kpisPrimary, { branch }, TTL.summary);
   }
   static kpisSecondary(branch?: string) {
-    return call<SecondaryKpis>(E.kpisSecondary, { branch });
+    return cachedCall<SecondaryKpis>(E.kpisSecondary, { branch }, TTL.summary);
   }
   static floorLive(limit = 6, branch?: string) {
-    return call<FloorLiveJob[]>(E.workshopFloorLive, { limit, branch });
+    return cachedCall<FloorLiveJob[]>(E.workshopFloorLive, { limit, branch }, TTL.list);
   }
   static todayPulse(branch?: string) {
-    return call<TodayPulse>(E.todayPulse, { branch });
+    return cachedCall<TodayPulse>(E.todayPulse, { branch }, TTL.summary);
   }
   static statusMix(branch?: string) {
-    return call<StatusMixEntry[]>(E.statusMix, { branch });
+    return cachedCall<StatusMixEntry[]>(E.statusMix, { branch }, TTL.summary);
   }
   static attentionFeed(limit = 8) {
-    return call<AttentionItem[]>(E.attentionFeed, { limit });
+    return cachedCall<AttentionItem[]>(E.attentionFeed, { limit }, TTL.list);
   }
 }
 

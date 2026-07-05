@@ -1,3 +1,4 @@
+import { cachedCall, TTL } from "./cache";
 import { call } from "./client";
 import { ENDPOINTS } from "./endpoints";
 import type {
@@ -13,19 +14,23 @@ const E = ENDPOINTS.appointments;
 /** Appointment endpoints (Part 5 §4.4) — ex_auto.api.appointments. */
 export class AppointmentService {
   static list(opts: ListAppointmentsOpts = {}) {
-    return call<AppointmentListRow[]>(E.list, { limit: 50, order_by: "appointment_time asc", ...opts });
+    return cachedCall<AppointmentListRow[]>(E.list, { limit: 50, order_by: "appointment_time asc", ...opts }, TTL.list);
   }
   static listToday(date: string, branch?: string) {
-    return call<AppointmentListRow[]>(E.list, { filters: { appointment_date: date, branch }, order_by: "appointment_time asc", limit: 50 });
+    return cachedCall<AppointmentListRow[]>(
+      E.list,
+      { filters: { appointment_date: date, branch }, order_by: "appointment_time asc", limit: 50 },
+      TTL.list
+    );
   }
   static todaySummary(branch?: string) {
-    return call<TodaySummary>(E.todaySummary, { branch });
+    return cachedCall<TodaySummary>(E.todaySummary, { branch }, TTL.summary);
   }
   static statusCounts() {
-    return call<StatusCounts>(E.statusCounts, {});
+    return cachedCall<StatusCounts>(E.statusCounts, {}, TTL.counts);
   }
   static get(name: string) {
-    return call<AppointmentDetail>(E.getDetail, { name });
+    return cachedCall<AppointmentDetail>(E.getDetail, { name }, TTL.detail);
   }
   static confirm(name: string) {
     return call<AppointmentDetail>(E.confirm, { name });

@@ -1,3 +1,4 @@
+import { cachedCall, TTL } from "./cache";
 import { call } from "./client";
 import { ENDPOINTS } from "./endpoints";
 import type {
@@ -32,13 +33,17 @@ function normalizeInspection(i: InspectionDetail): InspectionDetail {
 /** Inspection Report endpoints (Part 5 §3) — ex_auto.api.inspections + generic CRUD. */
 export class InspectionService {
   static list(opts: ListInspectionsOpts = {}) {
-    return call<InspectionListRow[]>(E.list, { limit: 50, start: 0, order_by: "inspection_date desc, modified desc", ...opts });
+    return cachedCall<InspectionListRow[]>(
+      E.list,
+      { limit: 50, start: 0, order_by: "inspection_date desc, modified desc", ...opts },
+      TTL.list
+    );
   }
   static statusCounts(branch?: string) {
-    return call<StatusCounts>(E.statusCounts, { branch });
+    return cachedCall<StatusCounts>(E.statusCounts, { branch }, TTL.counts);
   }
   static get(name: string) {
-    return call<InspectionDetail>(E.getDetail, { name }).then(normalizeInspection);
+    return cachedCall<InspectionDetail>(E.getDetail, { name }, TTL.detail).then(normalizeInspection);
   }
   static applyAction(name: string, action: InspectionAction) {
     return call<InspectionDetail>(E.applyAction, { name, action });
@@ -56,7 +61,7 @@ export class InspectionService {
     return call<string>(E.createForJobCard, p);
   }
   static findForJobCard(p: { job_card: string; inspection_type?: InspectionType }) {
-    return call<FindForJobCardResult>(E.findForJobCard, p);
+    return cachedCall<FindForJobCardResult>(E.findForJobCard, p, TTL.counts);
   }
   static createJobCardFromInspection(name: string) {
     return call<string>(E.createJobCardFromInspection, { name });

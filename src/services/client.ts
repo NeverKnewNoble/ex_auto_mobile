@@ -20,6 +20,15 @@ export class FrappeError extends Error {
   }
 }
 
+/**
+ * True when an error came from the fetch itself failing (no HTTP response) —
+ * i.e. we're offline / the host is unreachable, as opposed to the server
+ * returning a 4xx/5xx. The read cache and offline login key off this.
+ */
+export function isOfflineError(e: unknown): boolean {
+  return e instanceof FrappeError && e.status === undefined;
+}
+
 type Args = Record<string, unknown>;
 
 /** Serialize args the way the desktop `_client.ts` does. */

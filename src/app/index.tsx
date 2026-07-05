@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -44,17 +44,20 @@ export default function Splash() {
     return () => clearTimeout(id);
   }, [ready, isAuthed, router, sweep]);
 
-  const onLayout = useCallback(async () => {
-    if (fontsReady) await SplashScreen.hideAsync().catch(() => {});
+  // Hide the native splash the moment we can draw. This must live in an effect,
+  // not onLayout: the placeholder View is reused when fontsReady flips, so
+  // onLayout never re-fires and the native splash would stay up forever.
+  useEffect(() => {
+    if (fontsReady) SplashScreen.hideAsync().catch(() => {});
   }, [fontsReady]);
 
   const ignition = useAnimatedStyle(() => ({ width: `${sweep.value * 100}%` }));
 
   // The launch gate is intentionally always asphalt — ignition, not theme.
-  if (!fontsReady) return <View className="flex-1 bg-[#0B0C0F]" onLayout={onLayout} />;
+  if (!fontsReady) return <View className="flex-1 bg-[#0B0C0F]" />;
 
   return (
-    <View className="flex-1 justify-center bg-[#0B0C0F]" onLayout={onLayout}>
+    <View className="flex-1 justify-center bg-[#0B0C0F]">
       <GarageGrid />
 
       <View className="px-9">

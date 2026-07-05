@@ -10,6 +10,10 @@ import { fontFamily, sidebar } from "@/theme";
 export default function PagesLayout() {
   return (
     <Tabs
+      // Detail/create screens live in this tab navigator (href: null). Without
+      // "history", back() obeys the default "firstRoute" and jumps to the first
+      // tab (Home) instead of the screen the user actually came from.
+      backBehavior="history"
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: sidebar.primary,
@@ -89,6 +93,7 @@ export default function PagesLayout() {
       <Tabs.Screen name="requisition-create" options={{ href: null }} />
       <Tabs.Screen name="inspection-detail" options={{ href: null }} />
       <Tabs.Screen name="lookup" options={{ href: null }} />
+      <Tabs.Screen name="notifications" options={{ href: null }} />
     </Tabs>
   );
 }

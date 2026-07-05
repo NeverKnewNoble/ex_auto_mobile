@@ -17,6 +17,33 @@ interface PickerProps<M> {
   emptyText?: string;
 }
 
+/**
+ * Some picker endpoints return a normalized `{ value, label }`, but the
+ * `get_list` / list_* ones return raw Frappe rows (`name`, `*_name`). Derive a
+ * display label and a stable value from either shape so options never render
+ * blank and keyExtractor never returns undefined.
+ */
+function optionValue(o: unknown): string {
+  const r = (o ?? {}) as Record<string, unknown>;
+  return String(r.value ?? r.name ?? "");
+}
+function optionLabel(o: unknown): string {
+  const r = (o ?? {}) as Record<string, unknown>;
+  const cand =
+    r.label ??
+    r.customer_name ??
+    r.full_name ??
+    r.branch_name ??
+    r.warehouse_name ??
+    r.item_name ??
+    r.technician_name ??
+    r.employee_name ??
+    r.title ??
+    r.name ??
+    r.value;
+  return cand != null ? String(cand) : "";
+}
+
 /** Searchable typeahead in a bottom sheet. Drives every create-form link field. */
 export function Picker<M = Record<string, unknown>>({
   visible,
@@ -52,7 +79,7 @@ export function Picker<M = Record<string, unknown>>({
   }, [visible]);
 
   return (
-    <Sheet visible={visible} onClose={onClose} title={title}>
+    <Sheet visible={visible} onClose={onClose} title={title} full>
       {searchable && (
         <View className="mx-4 mb-2 h-12 flex-row items-center gap-2 rounded-md border border-border bg-card px-3">
           <Icon name="search" size={18} color={palette.mutedForeground} />
@@ -69,7 +96,8 @@ export function Picker<M = Record<string, unknown>>({
       )}
       <FlatList
         data={options}
-        keyExtractor={(o) => o.value}
+        style={{ flex: 1 }}
+        keyExtractor={(o, i) => optionValue(o) || String(i)}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 16 }}
         ListEmptyComponent={
@@ -82,13 +110,14 @@ export function Picker<M = Record<string, unknown>>({
         renderItem={({ item }) => (
           <Pressable
             onPress={() => {
-              onSelect(item);
+              // Hand the form a normalized option so its `value` is never blank.
+              onSelect({ ...item, value: optionValue(item), label: optionLabel(item) });
               onClose();
             }}
             className="flex-row items-center gap-3 border-b border-border py-3.5 active:opacity-60"
           >
             <View className="flex-1">
-              <Bold className="text-[15px]">{item.label}</Bold>
+              <Bold className="text-[15px]">{optionLabel(item)}</Bold>
               {item.sublabel ? <Small className="mt-0.5">{item.sublabel}</Small> : null}
             </View>
             <Icon name="chevron-forward" size={18} color={palette.mutedForeground} />

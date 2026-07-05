@@ -1,3 +1,4 @@
+import { cachedCall, TTL } from "./cache";
 import { call } from "./client";
 import { ENDPOINTS } from "./endpoints";
 import type {
@@ -32,13 +33,13 @@ function normalizeJobCard(j: JobCardDetail): JobCardDetail {
 /** Job Card endpoints (Part 5 §1) — ex_auto.api.job_cards + generic CRUD. */
 export class JobCardService {
   static list(opts: ListJobsOpts = {}) {
-    return call<JobCardListRow[]>(E.list, { limit: 50, start: 0, order_by: "modified desc", ...opts });
+    return cachedCall<JobCardListRow[]>(E.list, { limit: 50, start: 0, order_by: "modified desc", ...opts }, TTL.list);
   }
   static statusCounts(branch?: string) {
-    return call<StatusCounts>(E.statusCounts, { branch });
+    return cachedCall<StatusCounts>(E.statusCounts, { branch }, TTL.counts);
   }
   static get(name: string) {
-    return call<JobCardDetail>(E.getDetail, { name }).then(normalizeJobCard);
+    return cachedCall<JobCardDetail>(E.getDetail, { name }, TTL.detail).then(normalizeJobCard);
   }
   static applyAction(name: string, action: JobAction) {
     return call<JobCardDetail>(E.applyAction, { name, action });

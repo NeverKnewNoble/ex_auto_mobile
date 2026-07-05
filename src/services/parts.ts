@@ -1,3 +1,4 @@
+import { cachedCall, TTL } from "./cache";
 import { call } from "./client";
 import { ENDPOINTS } from "./endpoints";
 import type { StatusCounts } from "@/types/job-card";
@@ -25,19 +26,23 @@ function normalizeRequisition(r: RequisitionDetail): RequisitionDetail {
 /** Parts Requisition endpoints (Part 5 §2) — ex_auto.api.parts + generic CRUD. */
 export class PartsService {
   static list(opts: ListRequisitionsOpts = {}) {
-    return call<RequisitionListRow[]>(E.list, { limit: 50, start: 0, order_by: "requested_at desc", urgent_only: false, ...opts });
+    return cachedCall<RequisitionListRow[]>(
+      E.list,
+      { limit: 50, start: 0, order_by: "requested_at desc", urgent_only: false, ...opts },
+      TTL.list
+    );
   }
   static statusCounts() {
-    return call<StatusCounts>(E.statusCounts, {});
+    return cachedCall<StatusCounts>(E.statusCounts, {}, TTL.counts);
   }
   static storeKeeperSummary() {
-    return call<StoreKeeperSummary>(E.storeKeeperSummary, {});
+    return cachedCall<StoreKeeperSummary>(E.storeKeeperSummary, {}, TTL.summary);
   }
   static get(name: string) {
-    return call<RequisitionDetail>(E.getRequisition, { name }).then(normalizeRequisition);
+    return cachedCall<RequisitionDetail>(E.getRequisition, { name }, TTL.detail).then(normalizeRequisition);
   }
   static availability(items: { item_code: string; warehouse?: string }[], warehouse?: string) {
-    return call<ItemAvailability[]>(E.itemAvailability, { items, warehouse });
+    return cachedCall<ItemAvailability[]>(E.itemAvailability, { items, warehouse }, TTL.counts);
   }
   static applyAction(name: string, action: RequisitionAction) {
     return call<RequisitionDetail>(E.applyAction, { name, action });

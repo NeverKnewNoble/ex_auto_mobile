@@ -118,6 +118,7 @@ export const ENDPOINTS = {
     delete: "frappe.client.delete",
     get: "frappe.client.get",
     getList: "frappe.client.get_list",
+    getCount: "frappe.client.get_count",
     uploadFile: "upload_file",
   },
 } as const;
